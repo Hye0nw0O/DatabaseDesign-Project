@@ -21,7 +21,7 @@ public class Buy_Stock {
 
             double total_cost = cur_price * quantity;
             if (!check_user_balance(conn, user_name, total_cost)) {
-                stock_data_area.append("구매 불가: 현재 보유 금액보다 많은 금액을 구매할 수 없습니다.\n");
+                stock_data_area.append("현재 보유 금액보다 많은 금액을 구매할 수 없습니다.\n");
                 return;
             }
 
@@ -31,7 +31,7 @@ public class Buy_Stock {
             stock_data_area.append(user_name + " 사용자가 " + company_name + " 주식을 " + quantity + "만큼 구매하였습니다.\n");
         } catch (SQLException e) {
             if (e.getMessage().contains("Table is read only")) {
-                stock_data_area.append("구매 불가: 주식 장이 종료되어 거래가 불가능합니다.\n");
+                stock_data_area.append("주식 장이 종료되어 거래가 불가능합니다.\n");
             } else {
                 throw e;
             }
@@ -66,7 +66,6 @@ public class Buy_Stock {
             stmt.setDouble(1, total_cost);
             stmt.setString(2, user_name);
             stmt.executeUpdate();
-            System.out.println(user_name + " 사용자의 잔액" + total_cost + "만큼 차감");
         }
     }
 
@@ -79,7 +78,6 @@ public class Buy_Stock {
             stmt.setDouble(4, price);
             stmt.setString(5, dealType);
             stmt.executeUpdate();
-            System.out.println(user_name+ " 사용자의 매수 기록 완료"); // 가독성 이유로 얘는 없애도 될거 같음
         }
     }
     private static void update_own_stock(Connection conn, String user_name, String company_name, int quantity) throws SQLException { // 사용자 보유 주식 업데이트
@@ -90,7 +88,6 @@ public class Buy_Stock {
             stmt.setInt(3, quantity);
             stmt.setInt(4, quantity);
             stmt.executeUpdate();
-            System.out.println(user_name + " 사용자의 보유 주식 업데이트 완료");
         }
     }
     private static boolean is_stock_open(Connection conn) throws SQLException {

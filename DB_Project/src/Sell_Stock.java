@@ -73,7 +73,6 @@ public class Sell_Stock {
             stmt.setDouble(1, gain);
             stmt.setString(2, user_name);
             stmt.executeUpdate();
-            System.out.println(user_name + " 사용자의 잔액 업데이트 완료");
         }
     }
     private static void update_user_Stock(Connection conn, String user_name, String company_name, int quantity) throws SQLException { // 사용자가 소유한 주식 양 조정 => use Own_stock 테이블
@@ -89,7 +88,6 @@ public class Sell_Stock {
                 del_stmt.setString(2, company_name);
                 del_stmt.executeUpdate();
             }
-            System.out.println("Own stock 테이블 기반으로" + user_name + " 사용자의 주식 보유 량 업데이트 완료");
         }
     }
     private static void record_history(Connection conn, String user_name, String company_name, int quantity, double price, String dealType) throws SQLException { // 매도 거래 기록
@@ -101,7 +99,6 @@ public class Sell_Stock {
             stmt.setDouble(4, price);
             stmt.setString(5, dealType);
             stmt.executeUpdate();
-            System.out.println(user_name + " 사용자의 매도 기록 완료."); // 가독성 이유로 얘는 없애도 될 것 같음
         }
     }
 

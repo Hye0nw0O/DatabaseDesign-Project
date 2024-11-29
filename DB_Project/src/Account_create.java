@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Account_create {
     public interface  Account_create_callback {
@@ -38,10 +38,7 @@ public class Account_create {
             }
             if (insert_account(id, password, user_name)) {
                 JOptionPane.showMessageDialog(account_frame, "계정 생성 완료", "Account create success", JOptionPane.INFORMATION_MESSAGE);
-                callback.on_Account_create(user_name);
                 account_frame.dispose();
-            } else {
-                JOptionPane.showMessageDialog(account_frame, "ID, password, 사용자 명이 이미 존재합니다.", "Account create success", JOptionPane.ERROR_MESSAGE);
             }
         });
         skip.addActionListener(e -> { // skip 버튼 -> 기존 계정 존재 시, 계정 생성 없이 진행
@@ -66,23 +63,34 @@ public class Account_create {
 
     }
     private static boolean insert_account(String id, String password, String user_name) {
-        String check_query = "select count(*) from account where id = ? or user_name = ?";
         String query = "insert into Account (id, password, user_name) values (?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection(); PreparedStatement check_stmt = conn.prepareStatement(check_query); PreparedStatement stmt = conn.prepareStatement(query)) {
-            check_stmt.setString(1, id);
-            check_stmt.setString(2, user_name);
-            ResultSet rs = check_stmt.executeQuery();
-            if (rs.next() && rs.getInt(1) > 0) {
-                return false; // 같은 계정이 존재함
-            }
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, id);
             stmt.setString(2, password);
             stmt.setString(3, user_name);
             stmt.executeUpdate();
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("23000")) {
+                String error_msg = e.getMessage();
+                String error_field = extractDuplicateField(error_msg);
+                JOptionPane.showMessageDialog(null,  "이미 사용중인 " + error_field + "입니다.", "계정 생성 실패", JOptionPane.ERROR_MESSAGE);
+            } else {
+                e.printStackTrace();
+            }
         }
         return false;
     }
+    private static String extractDuplicateField(String errorMessage) {
+        if (errorMessage.contains("account.PRIMARY")) {
+            return "ID";
+        } else if (errorMessage.contains("account.password")) {
+            return "패스워드";
+        } else if (errorMessage.contains("account.user_name")) {
+            return "사용자 명";
+        } else {
+            return "알 수 없는 필드";
+        }
+    }
+
 }

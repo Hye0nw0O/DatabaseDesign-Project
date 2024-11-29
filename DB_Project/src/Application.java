@@ -3,6 +3,7 @@ import java.awt.*;
 import java.sql.SQLException;
 
 public class Application {
+    private static Timer limit_timer;
     public static void launch() {
         JFrame frame = new JFrame("Stock Trading System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -11,6 +12,8 @@ public class Application {
 
         JTextArea stock_data_area = new JTextArea();
         stock_data_area.setEnabled(false);
+        stock_data_area.setForeground(Color.black);
+
         JScrollPane scrollPane = new JScrollPane(stock_data_area);
         frame.add(scrollPane, BorderLayout.CENTER);
 
@@ -27,7 +30,7 @@ public class Application {
         });
         frame.add(refresh_button, BorderLayout.NORTH);
 
-        Timer auto_update_timer = new Timer(5000, e-> {
+        Timer auto_update_timer = new Timer(10000, e-> {
            try {
                Stock_update.update_stock_data(stock_data_area);
            } catch (Exception ex) {
@@ -37,11 +40,12 @@ public class Application {
         });
 
         // 종료 타이머
-        Timer limit_timer = new Timer(20000, e -> {
+        limit_timer = new Timer(60000, e -> {
             try {
                 Stock_update.close_stock();
                 auto_update_timer.stop();
                 stock_data_area.append("금일의 주식 장이 종료되었습니다.\n");
+                limit_timer.stop();
             } catch (SQLException ex) {
                 stock_data_area.append("주식 장 종료 중 오류 발생\n");
                 ex.printStackTrace();
